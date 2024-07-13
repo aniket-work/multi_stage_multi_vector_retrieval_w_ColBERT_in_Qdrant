@@ -1,3 +1,4 @@
+from qdrant_client import models
 from src.embeddings import EmbeddingGenerator
 from src.qdrant_client import QdrantWrapper
 
