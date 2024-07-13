@@ -14,16 +14,9 @@ class MultiStageQuery:
         points = []
         for i, doc in enumerate(documents):
             embedding = self.embedding_generator.generate_embedding(doc)
-            colbert_embedding = self.embedding_generator.generate_colbert_embedding(doc)
-            byte_vector = self.embedding_generator.generate_byte_vector(embedding)
-
             points.append(models.PointStruct(
                 id=i,
-                vector={
-                    "default": embedding,
-                    "colbert": colbert_embedding,
-                    "mrl_byte": byte_vector
-                },
+                vector=embedding,
                 payload={"text": doc}
             ))
 
@@ -31,8 +24,5 @@ class MultiStageQuery:
 
     def query(self, query_text):
         query_embedding = self.embedding_generator.generate_embedding(query_text)
-        query_colbert = self.embedding_generator.generate_colbert_embedding(query_text)
-        query_byte = self.embedding_generator.generate_byte_vector(query_embedding)
-
-        results = self.qdrant_wrapper.multi_stage_query(query_colbert, query_byte, query_embedding)
+        results = self.qdrant_wrapper.multi_stage_query(query_embedding)
         return results
