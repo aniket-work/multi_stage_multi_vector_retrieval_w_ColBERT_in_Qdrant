@@ -8,7 +8,11 @@ class QdrantWrapper:
     def create_collection(self, vector_size):
         self.client.recreate_collection(
             collection_name=COLLECTION_NAME,
-            vectors_config=models.VectorParams(size=vector_size, distance=models.Distance.COSINE),
+            vectors_config={
+                "default": models.VectorParams(size=vector_size, distance=models.Distance.COSINE),
+                "colbert": models.VectorParams(size=384, distance=models.Distance.COSINE),  # Adjust size based on your model
+                "mrl_byte": models.VectorParams(size=4, distance=models.Distance.COSINE)
+            }
         )
 
     def insert_points(self, points):
@@ -17,16 +21,20 @@ class QdrantWrapper:
             points=points
         )
 
-    def multi_stage_query(self, query_vectors, byte_vector):
-        return self.client.search(
+    def multi_stage_query(self, colbert_embedding, byte_vector, full_embedding):
+        return self.client.query_points(
             collection_name=COLLECTION_NAME,
-            query_filter=None,
-            search_params=models.SearchParams(
-                hnsw_ef=128,
-                exact=False
+            prefetch=models.Prefetch(
+                prefetch=models.Prefetch(
+                    query=byte_vector,
+                    using="mrl_byte",
+                    limit=1000,
+                ),
+                query=full_embedding,
+                using="default",
+                limit=100,
             ),
-            query_vector=query_vectors[0],  # Use the first vector for the main query
+            query=colbert_embedding,
+            using="colbert",
             limit=10,
-            with_payload=True,
-            with_vectors=True,
         )

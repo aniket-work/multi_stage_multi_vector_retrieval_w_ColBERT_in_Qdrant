@@ -1,8 +1,9 @@
-from src.data_loader import load_documents
+from src.embeddings import load_documents
 from src.multi_stage_query import MultiStageQuery
+from config import DOCUMENTS_FILE_PATH
 
 def main():
-    documents = load_documents('data/documents.txt')
+    documents = load_documents(DOCUMENTS_FILE_PATH)
     multi_stage_query = MultiStageQuery()
     multi_stage_query.prepare_data(documents)
 
