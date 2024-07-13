@@ -33,5 +33,5 @@ class MultiStageQuery:
         query_colbert = self.embedding_generator.generate_colbert_embedding(query_text)
         query_byte = self.embedding_generator.generate_byte_vector(query_embedding)
 
-        results = self.qdrant_wrapper.multi_stage_query(query_colbert, query_byte)
+        results = self.qdrant_wrapper.multi_stage_query([query_colbert], query_byte)
         return results
