@@ -18,19 +18,15 @@ class QdrantWrapper:
         )
 
     def multi_stage_query(self, query_vectors, byte_vector):
-        return self.client.query_points(
+        return self.client.search(
             collection_name=COLLECTION_NAME,
-            prefetch=models.Prefetch(
-                prefetch=models.Prefetch(
-                    query=byte_vector,
-                    using="mrl_byte",
-                    limit=1000,
-                ),
-                query=query_vectors[0],
-                using="full",
-                limit=100,
+            query_filter=None,
+            search_params=models.SearchParams(
+                hnsw_ef=128,
+                exact=False
             ),
-            query=query_vectors,
-            using="colbert",
+            query_vector=query_vectors[0],  # Use the first vector for the main query
             limit=10,
+            with_payload=True,
+            with_vectors=True,
         )
