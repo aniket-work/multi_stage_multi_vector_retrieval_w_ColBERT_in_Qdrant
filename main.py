@@ -1,34 +1,36 @@
-from src.embeddings import load_documents
-from src.multi_stage_query import MultiStageQuery
-from config import DOCUMENTS_FILE_PATH
+# main.py
+"""
+Main entry point for the multi-vector retrieval demonstration using Qdrant.
+"""
+
+from qdrant_client import QdrantClient
+
+import config
+from qdrant_operations import setup_collection
+from data_generation import generate_and_insert_points
+from query_execution import perform_multistage_query
+from visualization import visualize_results
+
 
 def main():
     """
-    Main function to demonstrate multi-stage querying with ColBERT approach in Qdrant.
-
-    This function loads documents, prepares the data for querying,
-    performs a sample query, and prints the results.
+    Main function to demonstrate multi-vector retrieval with Qdrant.
     """
-    # Load documents from the specified file path
-    documents = load_documents(DOCUMENTS_FILE_PATH)
+    client = QdrantClient(url=config.QDRANT_URL)
 
-    # Initialize the MultiStageQuery object
-    multi_stage_query = MultiStageQuery()
+    # Setup collection
+    setup_collection(client)
 
-    # Prepare the data by processing and indexing the documents
-    multi_stage_query.prepare_data(documents)
+    # Generate and insert points
+    num_points = config.DATASET_SIZE
+    points = generate_and_insert_points(client, num_points)
 
-    # Define a sample query
-    query = "Are dogs aggressive?"
+    # Perform multi-stage query
+    results = perform_multistage_query(client)
 
-    # Perform the query and get results
-    results = multi_stage_query.query(query)
+    # Visualize results
+    visualize_results(points, results)
 
-    # Print the query and results
-    print("Query:", query)
-    print("Top results:")
-    for result in results:
-        print(f"- {result.payload['text']} (Score: {result.score})")
 
 if __name__ == "__main__":
     main()
